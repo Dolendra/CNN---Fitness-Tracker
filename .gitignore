@@ -13,6 +13,7 @@ build/
 # Python / Backend Dependencies
 # ================================
 venv/
+venv/sqlite3
 env/
 ENV/
 __pycache__/
