@@ -1,0 +1,50 @@
+\chapter{INTRODUCTION}
+
+\section{Background of the Study}
+With the rising global awareness of personal health and fitness, home workouts and virtual training have experienced significant growth. However, executing exercises with incorrect posture or form reduces workout effectiveness and substantially increases the risk of acute and chronic musculoskeletal injuries. Traditional fitness tracking solutions typically rely on manual logs, simple timers, or wearable sensors. While wearable sensors (e.g., smartwatches, accelerometers) can estimate heart rate and total active calories burned, they are incapable of assessing postural alignment, checking biomechanical joint angles, or providing real-time feedback on form. 
+
+Recent advancements in computer vision and deep learning have opened new avenues for automated, markerless human pose estimation using consumer-grade webcams. By analyzing video frames in real-time, it is now possible to detect key body joints, calculate biomechanical properties, and guide users through workouts. Performing this computation locally (on-device edge computing) is crucial to eliminate the latency of cloud API roundtrips and to safeguard user privacy.
+
+\section{Problem Overview}
+Developing a real-time, edge-based fitness tracking application introduces several significant technical challenges:
+\begin{itemize}
+    \item \textbf{High-Latency Bottlenecks:} Conventional cloud-based computer vision pipelines process frames remotely, adding network delay. Real-time feedback requires processing feeds at 30 to 60 frames per second (FPS), corresponding to a budget of 16.6 to 33.3 milliseconds per frame.
+    \item \textbf{Biomechanical Mathematical Modeling:} Tracking coordinates alone is insufficient; the system must accurately map spatial keypoints to joint angles (e.g., elbows, knees, hips) and handle scale variations across individual body types and camera perspectives.
+    \item \textbf{Sequence Classification Complexity:} Workout repetitions are dynamic movements across time. Traditional single-frame pose classifiers fail to distinguish temporal phases of an exercise (e.g., the descent vs. ascent in a squat) or categorize overlapping movement shapes.
+    \item \textbf{Interface Fluidity:} Users require an intuitive dashboard that operates smoothly during heavy video streaming, combining live skeletons, timers, rep targets, and clear visual form alerts without lags.
+\end{itemize}
+
+\section{Significance of Study}
+This internship project at \textbf{Codec Technologies} addresses these challenges by developing \textbf{CNN - FitnessTracker} (commercially referred to as \textbf{SmartFit AI}), a high-performance edge-AI platform. The project demonstrates the viability of utilizing local computer vision models (MediaPipe Pose) alongside custom trigonometric algorithms to achieve zero-latency biomechanical assessment. 
+
+Furthermore, the integration of a hybrid deep learning model combining a One-Dimensional Convolutional Neural Network (1D-CNN) and Long Short-Term Memory (LSTM) network allows the system to analyze time-series coordinate sequences to classify workout activities automatically. The research and engineering presented in this report bridge the gap between theoretical deep learning models and production-ready full-stack applications.
+
+\section{Objectives of the Internship}
+The main objectives of this internship project are:
+\begin{enumerate}
+    \item To extract 33 3D body keypoints in real-time from webcam or video uploads using MediaPipe Pose.
+    \item To implement mathematical vector trigonometry algorithms to calculate real-time joint angles for limbs and torso alignment.
+    \item To build a state machine repetition counter with adaptive threshold margins across 13 diverse exercises.
+    \item To train and deploy a hybrid 1D-CNN + LSTM model that classifies exercise activity sequences with high precision.
+    \item To engineer a low-latency Flask backend streaming server using MJPEG compression.
+    \item To design and implement a responsive, modern React 19 frontend utilizing a premium dark-mode glassmorphic interface with CSS3 animations.
+\end{enumerate}
+
+\section{Scope of the Project}
+The scope of the CNN - FitnessTracker system includes:
+\begin{itemize}
+    \item \textbf{Real-Time Playground Module:} Displays the webcam stream overlaid with the extracted 3D skeletal joints, rep counting feedback, target goals HUD, and form warnings.
+    \item \textbf{Video Analysis Studio:} Allows drag-and-drop video file uploads to run offline analysis on recorded files.
+    \item \textbf{AI Sequence Classifier:} Performs automatic activity detection without manual selection, dynamically switching exercise profiles.
+    \item \textbf{Posture Guard System:} Checks body orientation to verify alignment and trigger visual/audio posture warnings (e.g., hip alignment, spine slope).
+\end{itemize}
+
+\section{Organisation of the Report}
+The rest of this internship report is organized as follows:
+\begin{itemize}
+    \item \textbf{Chapter 2 (Review of Literature)} surveys related work in pose estimation, MediaPipe, deep learning architectures (CNN and LSTM), and web API streaming technologies.
+    \item \textbf{Chapter 3 (System Design)} presents the architecture, data flow, functional/non-functional requirements, and hardware/software specifications.
+    \item \textbf{Chapter 4 (System Implementation \& Testing)} walkthrough the codebase modules, detailing joint angle trigonometry, rep-counting state machines, Flask video streaming, and testing cases.
+    \item \textbf{Chapter 5 (Results \& Discussion)} showcases the final web interface pages, system performance benchmarks, and optimizations.
+    \item \textbf{Chapter 6 (Conclusion \& Future Work)} summarizes key learning outcomes, system contributions, and the development roadmap.
+\end{itemize}

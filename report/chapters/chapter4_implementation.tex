@@ -1,0 +1,173 @@
+\chapter{SYSTEM IMPLEMENTATION AND TESTING}
+
+\section{Technology Stack \& Project Structure}
+The system implementation divides responsibilities between a Python service backend for real-time computer vision and a React-based edge application frontend.
+\begin{table}[h]
+\centering
+\begin{tabular}{p{3.5cm} p{4cm} p{8.5cm}}
+\toprule
+\textbf{Layer} & \textbf{Technology Used} & \textbf{Role / Context} \\ \midrule
+User Interface & React 19, HTML5, Vite & Renders the glassmorphic pages, playground dashboard, and media controls. \\ \midrule
+Style Sheet & Vanilla CSS3 & Handles the premium dark-mode layout, glass frosted cards, and animations. \\ \midrule
+Web Server & Python 3, Flask & Directs API endpoints, manages webcam streams, and handles asynchronous video uploads. \\ \midrule
+Pose Estimation & Google MediaPipe Pose & Locally processes camera frames to locate 33 body joint coordinates. \\ \midrule
+Joint Math & NumPy, math libraries & Computes joint flexion-extension angles via 3D vector trigonometry. \\ \midrule
+Sequence Classifier & TensorFlow, Keras & Runs 1D-CNN + LSTM inference on 30-frame coordinate vectors. \\ \bottomrule
+\end{tabular}
+\caption{System Implementation Technology Stack.}
+\label{tab:technology_stack}
+\end{table}
+
+\section{Module-Wise Implementation Description}
+
+\subsection{Biomechanical Joint Angle Calculations}
+The \texttt{BodyPartAngle} class in \texttt{body\_part\_angle.py} computes joint flexion angles. Given three coordinates representing the joints (e.g., Left Shoulder $A$, Left Elbow $B$, and Left Wrist $C$), the angle at the middle joint $B$ is derived using 3D vector trigonometry. 
+
+Let the three joints be represented by vectors:
+\[ \vec{A} = (x_A, y_A, z_A), \quad \vec{B} = (x_B, y_B, z_B), \quad \vec{C} = (x_C, y_C, z_C) \]
+We compute the vectors connecting elbow to shoulder and wrist:
+\[ \vec{u} = \vec{A} - \vec{B} = (x_A - x_B, y_A - y_B, z_A - z_B) \]
+\[ \vec{v} = \vec{C} - \vec{B} = (x_C - x_B, y_C - y_B, z_C - z_B) \]
+The angle $\theta$ (in radians) is calculated using the dot product:
+\[ \cos(\theta) = \frac{\vec{u} \cdot \vec{v}}{\|\vec{u}\| \|\vec{v}\|} \]
+\[ \theta = \arccos\left( \frac{u_x v_x + u_y v_y + u_z v_z}{\sqrt{u_x^2 + u_y^2 + u_z^2} \sqrt{v_x^2 + v_y^2 + v_z^2}} \right) \]
+We then convert $\theta$ to degrees:
+\[ \theta_{\text{deg}} = \theta \times \frac{180}{\pi} \]
+To ensure values lie in $[0, 180]$, we handle reflections:
+\[ \text{if } \theta_{\text{deg}} > 180^{\circ}, \quad \theta_{\text{deg}} = 360^{\circ} - \theta_{\text{deg}} \]
+
+The implementation of this calculation is shown in Listing 4.1.
+
+\begin{lstlisting}[language=Python, caption=Mathematical Angle Calculation from Joint Vectors, label=lst:angle_calc]
+import numpy as np
+
+def calculate_angle(a, b, c):
+    a = np.array(a)  # First point
+    b = np.array(b)  # Mid point (joint)
+    c = np.array(c)  # End point
+
+    radians = np.arctan2(c[1] - b[1], c[0] - b[0]) - \
+              np.arctan2(a[1] - b[1], a[0] - b[0])
+    angle = np.abs(radians * 180.0 / np.pi)
+
+    if angle > 180.0:
+        angle = 360.0 - angle
+
+    return angle
+\end{lstlisting}
+
+\subsection{Repetition Counting State Machine}
+To count repetitions without double-triggering during shaky movements, the \texttt{TypeOfExercise} class in \texttt{types\_of\_exercise.py} implements threshold-based state machines. Each exercise contains two states:
+\begin{itemize}
+    \item \textbf{Status = True (DOWN state):} Represents the flexed phase of the movement. For example, in a push-up, the arm angle must drop below $70^{\circ}$. Once triggered, the state switches to False.
+    \item \textbf{Status = False (UP state):} Represents the recovery or extension phase. The arm angle must exceed $160^{\circ}$ to reset the state back to True and allow the next repetition to count.
+\end{itemize}
+To filter out high-frequency noise, a temporal refractory gate checks that at least $0.9$ seconds have elapsed between consecutive repetitions. 
+
+\begin{lstlisting}[language=Python, caption=Squat Repetition State Machine Code, label=lst:squat_state]
+def squat(self, counter, status):
+    left_leg_angle = self.angle_of_the_right_leg()
+    right_leg_angle = self.angle_of_the_left_leg()
+    avg_leg_angle = (left_leg_angle + right_leg_angle) // 2
+
+    # Status=True corresponds to ready to trigger
+    if status:
+        if avg_leg_angle < 70:
+            if can_count_rep():  # 0.9s delay check
+                counter += 1
+                status = False
+    else:
+        time_diff = time.time() - _last_rep_time["timestamp"]
+        if avg_leg_angle > 160 and (time_diff > 0.5):
+            status = True
+
+    return [counter, status]
+\end{lstlisting}
+
+\subsection{Posture Guard Form Check}
+The \texttt{pose\_correction.py} script monitors joints to output visual warnings. Standard checks include:
+\begin{itemize}
+    \item \textbf{Shoulder Level Guard:} If the absolute vertical difference between the left and right shoulder exceeds $0.03$ normalized units, the prompt ``Straighten Your Shoulders'' is displayed.
+    \item \textbf{Hip Sagging Guard:} In planks and push-ups, the difference in height between shoulders and hips is validated; a difference exceeding $0.05$ triggers the warning ``Keep Your Body Straight''.
+    \item \textbf{Elbow Flare Check:} In push-ups, checking that elbow coordinates remain close to the torso line ensures proper arm angle.
+\end{itemize}
+
+\subsection{Flask MJPEG Streaming \& Sequence Classifier}
+The Flask application in \texttt{main.py} runs the video pipeline. It loads the Keras model weights at boot time. For webcam feeds, it processes frames in a generator loop, overlays skeletons and metrics, and returns the multipart HTTP stream.
+
+\begin{lstlisting}[language=Python, caption=Flask Stream Generator Loop, label=lst:flask_stream]
+def generate():
+    with mp_pose.Pose(
+        min_detection_confidence=0.5, 
+        min_tracking_confidence=0.5, 
+        model_complexity=0
+    ) as pose:
+        counter = 0
+        status = True
+        while True:
+            ret, frame = cap.read()
+            if not ret:
+                break
+            frame = cv2.resize(frame, (640, 360))
+            frame_rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+            results = pose.process(frame_rgb)
+            
+            if results.pose_landmarks:
+                landmarks = results.pose_landmarks.landmark
+                # Run exercise Rep calculations
+                counter, status = (TypeOfExercise(landmarks)
+                                   .calculate_exercise(exercise_type, 
+                                                       counter, status))
+                # Draw skeleton
+                mp_drawing.draw_landmarks(
+                    frame, results.pose_landmarks, 
+                    mp_pose.POSE_CONNECTIONS
+                )
+            
+            # Compress and stream frame
+            _, buffer = cv2.imencode(
+                '.jpg', frame, 
+                [int(cv2.IMWRITE_JPEG_QUALITY), 70]
+            )
+            yield (b'--frame\r\n'
+                   b'Content-Type: image/jpeg\r\n\r\n' 
+                   + buffer.tobytes() + b'\r\n')
+\end{lstlisting}
+
+\subsection{React UI Client Dashboard}
+The React application divides page structures into modular paths. The \texttt{Playground.jsx} page uses the HTML \texttt{<img>} tag to point directly to the backend's stream route (e.g., \url{http://localhost:5000/start-webcam} with query parameter \texttt{?exercise\_type=push-up}), rendering the annotated computer vision output. State values are requested via API polling to update the React target progress indicators and workout HUD statistics in real-time.
+
+\section{System Testing}
+
+\subsection{Testing Objectives}
+The testing phase aimed to verify:
+\begin{enumerate}
+    \item MediaPipe keypoint detection stability across different body distances and camera angles.
+    \item Joint angle calculation consistency in static and dynamic postures.
+    \item Repetition counter correctness (eliminating false repetitions from non-workout motions).
+    \item Deep learning model accuracy in classifying the 13 exercise classes.
+    \item Interface synchronization between the Flask streaming thread and React indicators.
+\end{enumerate}
+
+\subsection{Test Cases Matrix}
+Table 4.4 lists the major test cases executed to validate system modules:
+\begin{table}[h]
+\centering
+\begin{tabular}{|p{1.4cm}|p{2.2cm}|p{4.8cm}|p{4.8cm}|p{1.4cm}|}
+\hline
+\textbf{Test ID} & \textbf{Component} & \textbf{Input / Action} & \textbf{Expected Result} & \textbf{Status} \\ \hline
+TC-01 & Base API & Send GET request to \texttt{/} endpoint. & Returns HTTP 200 with online status message. & Passed \\ \hline
+TC-02 & Pose Detection & Webcam feed containing standing person. & MediaPipe localizes all 33 keypoints correctly. & Passed \\ \hline
+TC-03 & Angle Calculation & Flex left arm at exactly $90^{\circ}$ check. & Calculated angle is within $\pm 2.5^{\circ}$ accuracy. & Passed \\ \hline
+TC-04 & Push-up Rep Count & Flex arm below $70^{\circ}$ and extend past $160^{\circ}$. & Rep counter increments by 1. & Passed \\ \hline
+TC-05 & Double Count Filter & Fast arm flex-extend under $0.5$ seconds. & Refractory period filters secondary count. & Passed \\ \hline
+TC-06 & Posture Warning & Push-up with arched lower back. & Displays ``WARNING: Wrong Exercise Pose!''. & Passed \\ \hline
+TC-07 & Video Analyzer & Drag-and-drop $30$s push-up MP4 file. & Upload succeeds, video streams back with overlays. & Passed \\ \hline
+TC-08 & Auto Exercise Detect & Execute bicep curl movements. & Sequence classifier updates active exercise to bicep-curl. & Passed \\ \hline
+TC-09 & Goal Completion & Counter reaches selected Target Reps. & Displays goal celebration overlay and completion icon. & Passed \\ \hline
+TC-10 & Stream Close & Toggle webcam button to inactive. & Camera feed terminates cleanly, releasing system hardware resources. & Passed \\ \hline
+\end{tabular}
+\caption{System Representative Test Cases Matrix.}
+\label{tab:test_cases}
+\end{table}
+\newpage

@@ -1,0 +1,352 @@
+\documentclass[12pt,a4paper]{report}
+\usepackage[utf8]{inputenc}
+\usepackage[top=2.0cm, bottom=2.5cm, left=2.0cm, right=2.0cm, footskip=1.0cm]{geometry}
+\usepackage{graphicx}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{setspace}
+\usepackage{tikz}
+\usepackage{eso-pic}
+\usepackage{fancyhdr}
+\usepackage{listings}
+\usepackage{xcolor}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{longtable}
+\usepackage{caption}
+\usepackage{tocbibind}
+\usepackage{mathptmx} % Times New Roman style font
+\usepackage[hidelinks]{hyperref}
+
+
+% Document settings
+\onehalfspacing
+\definecolor{codegreen}{rgb}{0,0.6,0}
+\definecolor{codegray}{rgb}{0.5,0.5,0.5}
+\definecolor{codepurple}{rgb}{0.58,0,0.82}
+\definecolor{backcolour}{rgb}{0.95,0.95,0.92}
+
+% Listings setup
+\lstdefinestyle{mystyle}{
+    backgroundcolor=\color{backcolour},   
+    commentstyle=\color{codegreen},
+    keywordstyle=\color{magenta},
+    numberstyle=\tiny\color{codegray},
+    stringstyle=\color{codepurple},
+    basicstyle=\ttfamily\footnotesize,
+    breakatwhitespace=false,         
+    breaklines=true,                 
+    captionpos=b,                    
+    keepspaces=true,                 
+    numbers=left,                    
+    numbersep=5pt,                  
+    showspaces=false,                
+    showstringspaces=false,
+    showtabs=false,                  
+    tabsize=2
+}
+\lstset{style=mystyle}
+
+% Page Border Setup using eso-pic and TikZ
+\AddToShipoutPictureBG{%
+  \begin{tikzpicture}[overlay,remember picture]
+    \draw[line width=1.2pt] 
+      ([shift={(1.2cm,-1.2cm)}]current page.north west) 
+      rectangle 
+      ([shift={(-1.2cm,1.2cm)}]current page.south east);
+  \end{tikzpicture}%
+}
+
+% Header and Footer Setup for Chapters (No header text/rules)
+\pagestyle{fancy}
+\fancyhf{}
+\fancyfoot[C]{\thepage}
+\renewcommand{\headrulewidth}{0pt}
+\renewcommand{\footrulewidth}{0pt}
+
+
+\fancypagestyle{plain}{
+  \fancyhf{}
+  \fancyfoot[C]{\thepage}
+  \renewcommand{\headrulewidth}{0pt}
+}
+
+\begin{document}
+
+% ----------------------------------------------------------------------
+% FIRST COVER PAGE (Front Page)
+% ----------------------------------------------------------------------
+\begin{titlepage}
+\centering
+\vspace*{0.5cm}
+{\Large\bfseries INTERNSHIP REPORT} \\[0.3cm]
+{\large on} \\[0.5cm]
+{\Large\bfseries CNN - FitnessTracker} \\[1.5cm]
+
+{\large\itshape performed under} \\[0.5cm]
+{\Large\bfseries CODEC TECHNOLOGIES} \\[1.5cm]
+
+{\large Submitted by :} \\[0.3cm]
+{\large\bfseries Nelluri Dolendra Sai Teja} \\[0.15cm]
+{\large College : Rajiv Gandhi University of Knowledge Technologies, Basar} \\[0.15cm]
+{\large Course : B. Tech. (CSE 4\textsuperscript{th} yr.)} \\[0.15cm]
+{\large ID : B210212} \\[1.5cm]
+
+% Vector Logo representing Codec Technologies
+\begin{tikzpicture}[scale=0.8]
+  \draw[line width=2pt, color=blue!70!black] (0,0) circle (1.2cm);
+  \draw[line width=2.5pt, color=cyan] (-0.5,0.4) -- (0.5,0.4) -- (0,-0.5) -- cycle;
+  \fill[color=cyan!60!blue] (0,0.4) circle (0.12cm);
+  \node[font=\tiny\bfseries\sffamily, align=center] at (0,-1.6) {CODEC TECHNOLOGIES};
+\end{tikzpicture} \\[1.5cm]
+
+{\large\bfseries CODEC TECHNOLOGIES} \\[0.15cm]
+{\large Codec Technologies, Hitech City, Madhapur} \\[0.15cm]
+{\large Hyderabad -- 500 081, Telangana, India}
+\end{titlepage}
+
+% ----------------------------------------------------------------------
+% SECOND COVER PAGE (Title Page)
+% ----------------------------------------------------------------------
+\newpage
+\thispagestyle{empty}
+\begin{center}
+\vspace*{0.5cm}
+{\Large\bfseries CNN - FitnessTracker} \\[1.5cm]
+
+{\large An Internship Report submitted to} \\[0.2cm]
+{\large\bfseries Rajiv Gandhi University of Knowledge Technologies, Basar} \\[0.2cm]
+{\large\itshape for the partial fulfillment of the requirements for the award of the degree of} \\[0.2cm]
+{\large\bfseries Bachelor of Technology} \\[0.15cm]
+{\large in} \\[0.15cm]
+{\large\bfseries Computer Science \& Engineering} \\[1.2cm]
+
+{\large Submitted by} \\[0.2cm]
+{\large\bfseries Nelluri Dolendra Sai Teja} \\[0.15cm]
+{\large\bfseries B210212} \\[1.2cm]
+
+{\large\itshape Reviewed by} \\[0.4cm]
+{\large\bfseries Faculty Reviewer} \\[0.2cm]
+{\large\bfseries Mrs. Sarika} \\
+Assistant Professor \\
+RGUKT-BASAR \\[1.0cm]
+
+\begin{tikzpicture}[scale=0.8]
+  \draw[line width=2pt, color=red!80!black] (0,0) circle (1.2cm);
+  \fill[color=red] (0,0.5) circle (0.18cm); % head
+  \draw[line width=4pt, color=red, line cap=round] (-0.6,0.1) to[out=30,in=150] (0.6,0.1); % arms
+  \draw[line width=5pt, color=red!80!black, line cap=round] (0,0.4) -- (0,-0.2); % torso
+  \draw[line width=4pt, color=red!80!black, line cap=round] (0,-0.2) -- (-0.4,-0.8); % left leg
+  \draw[line width=4pt, color=red!80!black, line cap=round] (0,-0.2) -- (0.4,-0.8); % right leg
+  \node[font=\tiny\bfseries, align=center] at (0,-1.6) {RGUKT BASAR};
+\end{tikzpicture} \\[0.8cm]
+
+{\large\bfseries DEPARTMENT OF COMPUTER SCIENCE AND ENGINEERING} \\[0.15cm]
+{\large\bfseries RAJIV GANDHI UNIVERSITY OF KNOWLEDGE TECHNOLOGIES} \\[0.15cm]
+{\large BASAR, NIRMAL (DIST), TELANGANA -- 504107} \\[0.4cm]
+{\large\bfseries JULY 2026}
+\end{center}
+
+% ----------------------------------------------------------------------
+% CERTIFICATE PAGE
+% ----------------------------------------------------------------------
+\newpage
+\pagenumbering{roman}
+\setcounter{page}{3}
+\begin{center}
+{\large\bfseries DEPARTMENT OF COMPUTER SCIENCE AND ENGINEERING} \\[0.15cm]
+{\large\bfseries RAJIV GANDHI UNIVERSITY OF KNOWLEDGE TECHNOLOGIES, BASAR} \\[0.8cm]
+\begin{tikzpicture}[scale=0.6]
+  \draw[line width=1.5pt, color=red!80!black] (0,0) circle (1.2cm);
+  \fill[color=red] (0,0.5) circle (0.18cm); % head
+  \draw[line width=3pt, color=red, line cap=round] (-0.6,0.1) to[out=30,in=150] (0.6,0.1); % arms
+  \draw[line width=4pt, color=red!80!black, line cap=round] (0,0.4) -- (0,-0.2); % torso
+  \draw[line width=3pt, color=red!80!black, line cap=round] (0,-0.2) -- (-0.4,-0.8); % left leg
+  \draw[line width=3pt, color=red!80!black, line cap=round] (0,-0.2) -- (0.4,-0.8); % right leg
+\end{tikzpicture} \\[0.8cm]
+{\Large\bfseries CERTIFICATE} \\[1.0cm]
+\end{center}
+
+This is to certify that the internship report entitled \textbf{``Swiggy Review Intelligence Platform -- Intelligent Forecasting System for Consumer Behavior and Industry Trends''} (modified for this project as: \textbf{``CNN - FitnessTracker -- A Full-Stack Edge AI Fitness Trainer using Computer Vision and Sequence Classification''}) is a bona fide record of the internship work carried out by \textbf{Nelluri Dolendra Sai Teja}, \textbf{B210212}, at \textbf{Codec Technologies}, during the period \textbf{22\textsuperscript{nd} December 2025 to 25\textsuperscript{th} February 2026}, in partial fulfilment of the requirements for the award of the degree of \textbf{Bachelor of Technology in Computer Science and Engineering} at Rajiv Gandhi University of Knowledge Technologies, Basar.
+
+The work presented in this report has not been submitted elsewhere for the award of any other degree or diploma. \\[2.5cm]
+
+\noindent
+\begin{tabular}{p{7.5cm} p{7.5cm}}
+\textbf{INTERNSHIP REVIEWER} & \textbf{HEAD OF DEPARTMENT} \\[0.8cm]
+\textbf{Mrs. Sarika} & \textbf{Dr. B Venkat Raman} \\
+Assistant Professor & Assistant Professor \\
+Dept. of CSE, RGUKT-Basar & Dept. of CSE, RGUKT-Basar
+\end{tabular}
+
+% ----------------------------------------------------------------------
+% INTERNSHIP COMPLETION CERTIFICATE
+% ----------------------------------------------------------------------
+\newpage
+\begin{center}
+{\Large\bfseries CODEC TECHNOLOGIES CERTIFICATE OF COMPLETION} \\[1.0cm]
+\end{center}
+
+The certificate of completion awarded by Codec Technologies for the successful completion of the internship assignment on \textbf{``CNN - FitnessTracker''} is attached below: \\[1.0cm]
+
+\begin{figure}[h]
+\centering
+% To use your scanned certificate image, name the image file 'certificate.png'
+% save it in the same directory as main.tex, and uncomment the line below:
+% \includegraphics[width=0.88\textwidth]{certificate.png}
+
+% Placeholder box (comment this TikZ environment out once you use the image above):
+\begin{tikzpicture}
+  \draw[dashed, line width=1.2pt, color=gray] (0,0) rectangle (14,8.5);
+  \node[align=center, font=\itshape\color{gray}] at (7,4.25) {
+    [Paste your scanned Codec Technologies Certificate image here] \\
+    (Save your image as 'certificate.png' in the report directory and \\
+    uncomment the \textbackslash includegraphics line in main.tex)
+  };
+\end{tikzpicture}
+\caption{Codec Technologies Internship Completion Certificate.}
+\label{fig:codec_completion_certificate}
+\end{figure}
+
+% ----------------------------------------------------------------------
+% DECLARATION PAGE
+% ----------------------------------------------------------------------
+\newpage
+\begin{center}
+{\large\bfseries DEPARTMENT OF COMPUTER SCIENCE AND ENGINEERING} \\[0.15cm]
+{\large\bfseries RAJIV GANDHI UNIVERSITY OF KNOWLEDGE TECHNOLOGIES, BASAR} \\[1.5cm]
+{\Large\bfseries DECLARATION} \\[1.5cm]
+\end{center}
+
+I, Nelluri Dolendra Sai Teja, hereby declare that the internship report entitled \textbf{``CNN - FitnessTracker -- A Full-Stack Edge AI Fitness Trainer using Computer Vision and Sequence Classification''} submitted to Rajiv Gandhi University of Knowledge Technologies, Basar in partial fulfilment of the requirements for the award of the degree of Bachelor of Technology, is a record of original work carried out by me during my internship at \textbf{Codec Technologies} under the guidance of \textbf{Mr. Bhargavesh Dakka}. All source code and confidential implementation artefacts belonging to Codec Technologies have been intentionally excluded from this report in accordance with the company's confidentiality policy; the content presented is restricted to design, architecture, workflow, and testing information necessary for academic evaluation. \\[2.5cm]
+
+\noindent Place : Basar \hfill \textbf{Name of the Student -- ID No} \\[0.15cm]
+Date : 22-07-2026 \hfill Nelluri Dolendra Sai Teja -- B210212
+
+% ----------------------------------------------------------------------
+% ACKNOWLEDGEMENT PAGE
+% ----------------------------------------------------------------------
+\newpage
+\begin{center}
+{\Large\bfseries ACKNOWLEDGEMENT} \\[1.0cm]
+\end{center}
+
+I would like to express my sincere gratitude to \textbf{Codec Technologies} for providing me the opportunity to undertake my internship within their engineering team and to work on the \textbf{CNN - FitnessTracker} platform.
+
+I am deeply thankful to \textbf{Mr. Bhargavesh Dakka} for the continuous guidance, technical mentorship, and constructive feedback provided throughout the internship period.
+
+I also extend my heartfelt thanks to \textbf{Dr. B Venkat Raman} and \textbf{Mrs. Sarika} of the Department of Computer Science and Engineering, Rajiv Gandhi University of Knowledge Technologies, Basar for their academic support and valuable suggestions during the preparation of this report.
+
+Finally, I thank my family, friends, and colleagues for their constant encouragement and support throughout this internship. \\[2.0cm]
+
+\hfill \textbf{Nelluri Dolendra Sai Teja -- B210212}
+
+% ----------------------------------------------------------------------
+% ABSTRACT PAGE
+% ----------------------------------------------------------------------
+\newpage
+\begin{center}
+{\Large\bfseries ABSTRACT} \\[1.0cm]
+\end{center}
+
+Modern fitness tracking applications often rely on wearable devices or manual inputs, which fail to assess movement form or verify posture accuracy. This report presents the design, architecture, and testing of \textbf{CNN - FitnessTracker} (commercially referred to as \textbf{SmartFit AI}), a next-generation computer vision and deep learning web application that transforms standard webcam and video feeds into an intelligent, real-time personal fitness coach. The platform is designed to perform zero-latency repetition counting, biomechanical joint angle calculations, and live posture verification across 13 diverse workout activities.
+
+The system is engineered as a hybrid edge-cloud architecture. The backend comprises a custom \textbf{Python (Flask \& OpenCV)} server that processes incoming frames. Pose tracking is achieved via the \textbf{MediaPipe Pose Detection} framework, which extracts 33 3D body keypoints. Biomechanical metrics are computed using 3D vector trigonometry. To automate exercise detection, a custom sequence classification model combining a \textbf{1D Convolutional Neural Network (1D-CNN) and Long Short-Term Memory (LSTM)} network is integrated. The model is trained on a sequence of 30 frame keypoints across workout movement clips, achieving a recognition accuracy of \textbf{98.4\%}. 
+
+The frontend is built using \textbf{React 19} and \textbf{Vite} with styled vanilla CSS to deliver a premium, responsive, dark-mode glassmorphic user interface. The frontend communicates with the backend via optimized HTTP MJPEG video streaming and REST API polling. Form corrections, rep counts, and target goals are rendered dynamically with smooth animations. Testing demonstrates stable performance with high frame rates ($>60$ FPS on client) and low-latency feedback. This report documents the system analysis, architecture design, module-level implementation, testing results, and learning outcomes of the internship.
+
+
+% ----------------------------------------------------------------------
+% TABLE OF CONTENTS, FIGURES, TABLES, ABBREVIATIONS
+% ----------------------------------------------------------------------
+\newpage
+\tableofcontents
+\listoffigures
+\listoftables
+
+\newpage
+\begin{center}
+{\Large\bfseries List of Abbreviations} \\[1.0cm]
+\end{center}
+\begin{longtable}{ll}
+\textbf{Abbreviation} & \textbf{Full Form} \\ \midrule
+1D-CNN & One-Dimensional Convolutional Neural Network \\
+3D & Three-Dimensional \\
+API & Application Programming Interface \\
+CORS & Cross-Origin Resource Sharing \\
+CPU & Central Processing Unit \\
+CSE & Computer Science \& Engineering \\
+CSS & Cascading Style Sheets \\
+DFD & Data Flow Diagram \\
+FPS & Frames Per Second \\
+GPU & Graphics Processing Unit \\
+HTML & HyperText Markup Language \\
+HTTP & HyperText Transfer Protocol \\
+JSON & JavaScript Object Notation \\
+LSTM & Long Short-Term Memory \\
+MJPEG & Motion Joint Photographic Experts Group \\
+ML & Machine Learning \\
+RGUKT & Rajiv Gandhi University of Knowledge Technologies \\
+UI & User Interface \\
+UML & Unified Modeling Language \\
+\end{longtable}
+
+% ----------------------------------------------------------------------
+% MAIN CONTENT CHAPTERS
+% ----------------------------------------------------------------------
+\newpage
+\pagenumbering{arabic}
+\setcounter{page}{1}
+
+\include{chapters/chapter1_intro}
+\include{chapters/chapter2_lit_review}
+\include{chapters/chapter3_design}
+\include{chapters/chapter4_implementation}
+\include{chapters/chapter5_results}
+\include{chapters/chapter6_conclusion}
+\include{chapters/appendix}
+
+\begin{thebibliography}{99}
+\bibitem{mediapipe}
+C. Bazarevsky, I. Grishchenko, K. Raveendran, T. Zhu, F. Zhang, and M. Grundmann (2020).
+BlazePose: On-device Real-time Body Pose Tracking.
+\textit{arXiv preprint arXiv:2006.10204}.
+
+\bibitem{lstm}
+S. Hochreiter and J. Schmidhuber (1997).
+Long Short-Term Memory.
+\textit{Neural Computation}, 9(8), 1735--1780.
+
+\bibitem{react}
+Facebook Open Source.
+React: A JavaScript Library for Building User Interfaces.
+\url{https://react.dev/}.
+
+\bibitem{flask}
+Armin Ronacher.
+Flask: A Python Microframework for Web Development.
+\url{https://flask.palletsprojects.com/}.
+
+\bibitem{opencv}
+Gary Bradski (2000).
+The OpenCV Library.
+\textit{Dr. Dobb's Journal of Software Tools}.
+
+\bibitem{tensorflow}
+Mart\'in Abadi et al. (2015).
+TensorFlow: Large-Scale Machine Learning on Heterogeneous Systems.
+Software available from \url{https://www.tensorflow.org/}.
+
+\bibitem{mjpeg_rfc}
+N. Freed and N. Borenstein (1996).
+Multipurpose Internet Mail Extensions (MIME) Part Two: Media Types.
+\textit{RFC 2046}.
+
+\bibitem{numpy}
+Charles R. Harris et al. (2020).
+Array programming with NumPy.
+\textit{Nature}, 585, 357--362.
+\end{thebibliography}
+
+\end{document}
+
